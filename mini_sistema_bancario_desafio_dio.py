@@ -1,13 +1,48 @@
 from datetime import datetime
 from functools import wraps
 
+LOG_FILE = "log.txt"
+MAX_LEN = 250
+
+def _short(value, max_len=MAX_LEN):
+  """Converte o valor para string curta (para não poluir o log)."""
+  text = repr(value)
+  if len(text) > max_len:
+    return text[:max_len] + "...(truncado)"
+  return text
+
 def log_transacao(func):
   @wraps(func)
   def wrapper(*args, **kwargs):
     data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    tipo = func.__name__ 
-    print(f"[LOG] {data_hora} | Transação: {tipo}")
-    return func(*args, **kwargs)
+
+    try:
+      resultado = func(*args, **kwargs)
+      status = "OK"
+      erro = ""
+    except Exception as exc:
+      resultado = None
+      status = "ERRO"
+      erro = f"{type(exc).__name__}: {exc}"
+
+      linha_log = (
+       f"{data_hora} | status={status} | func={func.__name__} | "
+       f"args={_short(args)} | kwargs={_short(kwargs)} | erro={_short(erro)}"
+      ) 
+      with open(LOG_FILE, "a", encoding="utf-8") as arq:
+        arq.write(linha_log + "\n")
+
+      raise
+
+    linha_log = (
+       f"{data_hora} | status={status} | func={func.__name__} | "
+       f"args={_short(args)} | kwargs={_short(kwargs)} | return={_short(resultado)}"
+    )
+
+    with open(LOG_FILE, "a", encoding="utf-8") as arq:
+      arq.write(linha_log + "\n")
+
+    return resultado
   return wrapper
 
 menu = """
@@ -49,7 +84,7 @@ class IteradorTransacoes:
     return self
 
   def __next__(self):
-    if self.__index >= len(self.filtradas): 
+    if self.__index >= len(self.filtradas):
       raise StopIteration
 
     inicio = self.__index
@@ -82,7 +117,7 @@ def gerar_relatorio(transacoes, tipo=None):
 
   for t in transacoes:
     if tipo is None or t["tipo"]  == tipo:
-      yield t 
+      yield t
 
 @log_transacao
 def criar_usuario(usuarios, nome, data_nascimento, cpf, endereco):
@@ -211,7 +246,7 @@ while True:
             extrato=extrato,
             limite=limite,
             numero_saques=numero_saques,
-            limite_saques=LIMITE_SAQUES 
+            limite_saques=LIMITE_SAQUES
         )
 
     elif opcao == "l":
@@ -221,15 +256,15 @@ while True:
         print("\n================ EXTRATO ================")
         exibir_extrato(saldo, extrato=extrato)
 
-    elif opcao == "d": 
+    elif opcao == "d":
       valor = float(input("Informe o valor do depósito:"))
       saldo, extrato = depositar(saldo, valor, extrato)
 
     elif opcao == "r":
-      filtro = input("Filtrar por tipo? [t] todos | [d] depósitos | [s] saques: ").lower() 
+      filtro = input("Filtrar por tipo? [t] todos | [d] depósitos | [s] saques: ").lower()
 
       if filtro == "d":
-        tipo = "depósito" 
+        tipo = "depósito"
       elif filtro =="s":
         tipo = "saque"
       else:
@@ -239,16 +274,16 @@ while True:
       encontrou = False
       for t in gerar_relatorio(extrato, tipo=tipo):
         encontrou = True
-        print(f'{t["data_hora"]} - {t["tipo"].capitalize()}: R$ {t["valor"]:.2f}') 
+        print(f'{t["data_hora"]} - {t["tipo"].capitalize()}: R$ {t["valor"]:.2f}')
       if not encontrou:
             print("Nenhuma transação encontrada para o filtro escolhido.")
-      print("=============================================") 
+      print("=============================================")
 
     elif opcao == "i":
               filtro = input("Filtrar por tipo? [t] todos | [d] depósitos | [s] saques: ").lower()
 
               if filtro == "d":
-                tipo = "depósito" 
+                tipo = "depósito"
               elif filtro == "s":
                 tipo = "saque"
               else:
@@ -269,11 +304,11 @@ while True:
                 houve_algo = True
                 for t in pagina:
                     print(f'{t["data_hora"]} - {t["tipo"].capitalize()}: R$ {t["valor"]:.2f}')
-                input("\nPressione ENTER para continuar...") 
+                input("\nPressione ENTER para continuar...")
                 print("------------------------------------------------------------------")
-              if not houve_algo: 
+              if not houve_algo:
                   print("Nenhuma transação encontrada para o filtro escolhido.")
-              print("==========================================================") 
+              print("==========================================================")
 
 
     elif opcao == "q":
