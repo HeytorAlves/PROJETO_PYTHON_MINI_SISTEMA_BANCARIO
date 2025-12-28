@@ -1,8 +1,8 @@
-# 🏦 Sistema Bancário em Python (CLI) — Atualização 2.0
+# 🏦 Sistema Bancário em Python (CLI) — Atualização 3.0
 
-Este projeto implementa um **sistema bancário em Python executado via terminal (CLI)**, evoluído a partir de um exercício básico para um **sistema modular e extensível**, incorporando conceitos intermediários e avançados da linguagem.
+Este projeto implementa um **sistema bancário em Python executado via terminal (CLI)**, evoluído de um exercício básico para um **sistema modular, auditável e extensível**, incorporando conceitos intermediários e avançados da linguagem.
 
-O projeto foi desenvolvido com foco em **boas práticas, clareza arquitetural e domínio de recursos do Python**, indo além de um script procedural simples.
+A versão atual amplia o foco em **rastreabilidade, organização de dados e boas práticas**, aproximando o projeto de um cenário real de aplicação financeira.
 
 ---
 
@@ -16,7 +16,7 @@ Simular um sistema bancário que permita:
 - Registro estruturado de transações
 - Geração de relatórios com generators
 - Iteração personalizada sobre transações
-- Registro automático de logs via decorators
+- **Registro automático e persistente de logs em arquivo**
 
 ---
 
@@ -31,17 +31,19 @@ O projeto exercita, de forma integrada, os seguintes conceitos:
 - Retorno e atualização de estado
 
 ### Conceitos Intermediários e Avançados
-- Assinaturas avançadas de funções
+- Assinaturas avançadas de funções:
   - Argumentos somente posicionais (`/`)
   - Argumentos somente nomeados (`*`)
   - Combinação de ambos
 - Decorators
 - Generators (`yield`)
 - Iteradores personalizados (`__iter__`, `__next__`)
+- Manipulação de data e hora (`datetime`)
 - Separação clara entre:
   - Orquestração (menu)
   - Regra de negócio (funções)
   - Persistência em memória (listas)
+  - Auditoria (logs)
 
 ---
 
@@ -56,8 +58,10 @@ O projeto exercita, de forma integrada, os seguintes conceitos:
   - Endereço
 - O sistema impede o cadastro de CPFs duplicados
 
+---
+
 ### 📋 Listagem de Usuários
-- Permite listar todos os usuários cadastrados
+- Lista todos os usuários cadastrados
 - Exibe CPF (ordenado), nome e data de nascimento
 - Facilita a identificação para criação de contas
 
@@ -76,7 +80,7 @@ O projeto exercita, de forma integrada, os seguintes conceitos:
 - Aceita apenas valores positivos
 - Atualiza o saldo
 - Registra a transação de forma estruturada
-- Implementada com parâmetros somente posicionais
+- Implementada com **parâmetros somente posicionais**
 
 ---
 
@@ -85,9 +89,9 @@ O projeto exercita, de forma integrada, os seguintes conceitos:
   - Saldo suficiente
   - Limite máximo por saque
   - Quantidade máxima de saques
-- Atualiza saldo e contador
+- Atualiza saldo e contador de saques
 - Registra a transação
-- Implementada com parâmetros somente nomeados
+- Implementada com **parâmetros somente nomeados**
 
 ---
 
@@ -95,29 +99,42 @@ O projeto exercita, de forma integrada, os seguintes conceitos:
 - Exibe todas as transações registradas
 - Mostra data, tipo e valor de cada movimentação
 - Exibe o saldo final
-- Implementada com parâmetros mistos (posicional + nomeado)
+- Implementada com **parâmetros mistos (posicional + nomeado)**
 
 ---
 
 ## 🧾 Registro de Transações (Modelo Estruturado)
 
-As transações são armazenadas como uma **lista de dicionários**, permitindo filtragem e iteração:
+As transações são armazenadas como uma **lista de dicionários**, permitindo filtragem, geração de relatórios e iteração:
 
 ```python
 {
-  "tipo": "deposito" | "saque",
+  "tipo": "depósito" | "saque",
   "valor": float,
   "data_hora": "YYYY-MM-DD HH:MM:SS"
 }
 ```
-## 🧩 Decorator de Log
 
-O sistema utiliza um decorator de log que registra automaticamente:
+---
 
+## 🧩 Decorator de Log (Auditoria)
+
+O sistema utiliza um **decorator de log** aplicado às principais funções do sistema.
+
+### O decorator registra automaticamente:
 - Data e hora da execução
 - Nome da função chamada (tipo da operação)
+- Persistência das informações em arquivo
 
-O decorator é aplicado às principais funções do sistema, garantindo rastreabilidade sem repetição de código.
+### 📄 Arquivo de Log
+- Nome do arquivo: `log.txt`
+- Cada chamada de função gera uma nova linha
+- Logs são **anexados ao final do arquivo**
+- Permite auditoria, análise posterior e rastreabilidade completa
+
+Esse mecanismo simula **logs reais de sistemas financeiros**, indo além da simples impressão em console.
+
+---
 
 ## 🔁 Gerador de Relatórios (Generator)
 
@@ -129,6 +146,9 @@ O sistema inclui um generator que:
   - Depósitos
   - Saques
 - Gera as transações sob demanda, sem criar listas intermediárias
+- Ideal para grandes volumes de dados
+
+---
 
 ## 📦 Iterador Personalizado
 
@@ -138,10 +158,13 @@ Foi implementado um iterador personalizado que:
 - Suporta filtro por tipo de transação
 - Implementa paginação (quantidade fixa de transações por vez)
 - Simula leitura incremental de dados
+- Controla o fluxo de exibição no terminal
+
+---
 
 ## 🧩 Estrutura do Código
 
-- O `while True` atua apenas como orquestrador do menu
+- O `while True` atua apenas como **orquestrador do menu**
 - Toda a lógica de negócio está encapsulada em funções
 - O estado do sistema é mantido em memória por:
   - `saldo`
@@ -149,14 +172,27 @@ Foi implementado um iterador personalizado que:
   - `numero_saques`
   - `usuarios`
   - `contas`
+- Logs são persistidos externamente em arquivo
+
+---
 
 ## ▶️ Como Executar
 
-1. Certifique-se de ter o Python 3.8+ instalado
+1. Certifique-se de ter o **Python 3.8+** instalado
 2. Clone o repositório
-3. Execute o arquivo principal
+3. Execute o arquivo principal:
+   ```bash
+   python main.py
+   ```
 4. Utilize o menu interativo no terminal
+
+---
 
 ## 📌 Observação Final
 
-Este projeto foi desenvolvido com intenção didática, mas seguindo padrões reais de organização de código. Serve como base para estudos de Python intermediário e para futuras evoluções do sistema.
+Este projeto foi desenvolvido com **finalidade didática**, mas seguindo **padrões reais de organização, rastreabilidade e auditoria de sistemas**.
+
+Ele serve como base sólida para:
+- Estudos de Python intermediário/avançado
+- Projetos de portfólio
+- Evoluções futuras (persistência em banco de dados, POO completa, testes, etc.)
